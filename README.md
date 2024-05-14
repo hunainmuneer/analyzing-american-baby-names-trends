@@ -18,7 +18,7 @@ How have American baby name tastes changed since 1920? Which names have remained
 ## Methodology
 
 - SQL is utilized for this project to perform Data Manipulation and Exploratory Data Analysis.
-- Following are the techniques used in this project: ranking, grouping, joining, ordering, and pattern matching skills 
+- Following are the techniques used in this project: window functions, common table expression (cte), sub queries, ranking, grouping, joining, ordering, and pattern matching skills 
 
 ## Requirements
 
@@ -74,7 +74,6 @@ FROM baby_names
 GROUP BY first_name
 ORDER BY first_name
 ```
-
 Answer:
 
 | first_name | sum | popularity_type |
@@ -91,10 +90,194 @@ Answer:
 - If the name appears in the dataset for between 50 and 80 years -> 'Semi-classic'
 - If the name appears in the dataset for between 20 and 50 years -> 'Semi-trendy'
 - If the name appears in the dataset for less than 20 years -> 'Trendy'
-- The above SQL result is a preview. You can view the complete result at [here]()
-    
+- The above SQL result is a preview. You can view the complete result at [here](notebook.ipynb)
+
+**3. Top-ranked female names since 1920**  
+```sql
+SELECT first_name,
+SUM(num),
+RANK() OVER(ORDER BY SUM(num) DESC) AS name_rank
+FROM baby_names
+WHERE sex = 'F'
+GROUP BY first_name
+LIMIT 10
+```
+Answer:
+
+| first_name | sum | name_rank |
+|-|-|-|
+|Mary| 3215850 | 1 |
+|Patricia| 1479802 | 2 |
+|Elizabeth|	1436286 |	3 |
+|Jennifer| 1404743 |	4 |
+|Linda|	1361021 |	5 |
+|Barbara|	1343901 |	6 |
+|Susan|	1025728 |	7 |
+|Jessica|	994210 | 8 |
+|Lisa| 920119 |	9 |
+|Betty|	893396 | 10 |
+
+
+- The SQL query utilizes the window function (rank) to rank the top female baby names.
+- "Mary" is the most popular name among the female babies eventhough it did not appear in our first query. ( The first query was only for the names that were given in all of the 101 years in our dataset)
+- The query is limiting the results to only top 10 names.
+
+**4. Picking a baby name**
+```sql
+SELECT first_name
+FROM baby_names
+WHERE sex = 'F' AND year > 2015 AND first_name LIKE '%a'
+GROUP BY first_name
+ORDER BY sum(num) DESC
+```
+Answer:
+
+| first_name |
+|-|
+| Olivia |
+| Emma |
+| Ava |
+| Sophia |
+| Isabella |
+| Mia |
+| Amelia |
+| Ella |
+| Sofia |
   
+- The SQL query retrives the most popular female baby names that ends with a vowel 'a' in their name.
+- The query filters the result for the recent popular names that were given after the year 2015.
+- The result shows the names in descending order, with the most popular name at the top.
+- "Olivia" was the top name amongst female baby names since 2015.
+- The above SQL result is a preview. You can view the complete result at [here](notebook.ipynb)
+
+**5. The Olivia expansion**
+```sql
+SELECT year, first_name, num,
+SUM(num) OVER(ORDER BY year) AS cumulative_olivias
+FROM baby_names
+WHERE first_name = 'Olivia'
+ORDER BY year
+```
+Answer:
+
+| year | first_name | num	| cumulative_olivias |
+|-|-|-|-|
+|1991|	Olivia | 5601 | 5601 |
+|1992|	Olivia | 5809	| 11410 |
+|1993|	Olivia | 6340	| 17750 |
+|1994|	Olivia | 6434 | 24184 |
+|1995|	Olivia | 7624 | 31808 |
+  
+- The SQL query dives into more depth, analyzing the rise of the name "Olivia". 
+- The result shows that the name was first given in 1991 and to 5601 babies.
+- The window function is utilized to see the trend of the name "Olivia" over the years by using cummulative sum. 
+- The above SQL result is a preview. You can view the complete result at [here](notebook.ipynb)
+
+**6. Many males with the same name**
+```sql
+SELECT year, MAX(num) AS max_num
+FROM baby_names
+WHERE sex = 'M'
+GROUP BY year
+```
+Answer: 
+
+| year | max_num |
+|-|-|
+|1970| 85291 |
+|2000| 34483 |
+|1947| 94764 |
+|1962| 85041 |
+|1975| 68451 |
+
+-  The SQL query retrives the maximum number for male baby names each year.
+-  This SQL query will be used as a subquery in the next question where we will utilize it to view the most popular male baby name each year.
+- The above SQL result is a preview. You can view the complete result at [here](notebook.ipynb)
+
+**7. Top male names over the years**
+```sql
+SELECT b.year, b.first_name, b.num
+FROM baby_names AS b
+INNER JOIN (
+SELECT year, MAX(num) AS max_num
+FROM baby_names
+WHERE sex = 'M'
+GROUP BY year
+) AS subquery
+ON b.year = subquery.year AND b.num = subquery.max_num
+ORDER BY year DESC
+```
+Answer: 
+
+| year | first_name |	num |
+|-|-|-|
+|2020| Liam | 19659 |
+|2019| Liam |	20555 |
+|2018| Liam |	19924 |
+|2017| Liam | 18824 |
+|2016| Noah	| 19154 |
+|2015| Noah	| 19650 |
+|2014| Noah	| 19319 |
+|2013| Noah | 18266 |
+|2012| Jacob | 19088 |
+
+- The SQL query uses the subquery from the pervious step to perform a join.
+- The SQL query shows the results for the most popular male baby name each year.
+- The results also shows the number of babies who were named that name each year in descending order.
+- The above SQL result is a preview. You can view the complete result at [here](notebook.ipynb)
+
+**8. The most years at number one**
+```sql
+WITH cte AS(
+SELECT b.year, b.first_name, b.num
+FROM baby_names AS b
+INNER JOIN (
+SELECT year, MAX(num) AS max_num
+FROM baby_names
+WHERE sex = 'M'
+GROUP BY year
+) AS subquery
+ON b.year = subquery.year AND b.num = subquery.max_num
+ORDER BY year DESC)
+
+SELECT first_name, COUNT(year) AS count_top_name
+FROM cte
+GROUP BY first_name
+ORDER BY COUNT(year) DESC
+```
+Answer: 
+
+| first_name | count_top_name |
+|-|-|
+|Michael| 44|
+|Robert| 17 |
+|Jacob| 14 |
+|James| 13 |
+|Noah| 4 |
+|John| 4 |
+|Liam| 4 |
+|David|	1 |
+
+- The SQL query builds on the previous query where we retrieved the top names in each year, using the pervious query as a Common Table Expression (CTE).
+- This SQL query retrieves the number of times a male baby name has been the top name each year.
+- The result shows that "Micheal" has been the most popuplar name amongst male baby names, taking the first position in a year, 44 times.
+
+## Key Findinga:
+
+- There are 8 names that were given each year since 1920 till 2020. Following are the names starting with the most popular name.
+  1. James	
+  2. John	
+  3. William	
+  4. David	
+  5. Joseph	
+  6. Thomas	
+  7. Charles	
+  8. Elizabeth
+- Classification of the names based on how many years were they given to at least one baby.
+- "Mary" was the most popular name given to a female baby since 1920. Approximately 3.2 million female babies were given the name, Mary.
+- "Olivia" was the most popular female baby name that ends with a vowel 'a'.
+- The name "Olivia" was first given in year 1991 and had a meteoric rise!
+- "Micheal" was the most popular name amongst male baby, which topped the list 44 times. 
   
 
-
-
+  ## The End 
