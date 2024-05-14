@@ -26,11 +26,75 @@ To run the SQL queries, you will need access to a PostgreSQL database containing
 
 ## Data
 
-### `categories` table
+### `baby_names` table
 
 | Column | Definition | Data Type |
 |-|-|-|  
-|category_code| Code for the category of the business |`varchar`|
-|category| Description of the business category |`varchar`|
+|year| year |`int`|
+|first_name| first name |`varchar`|
+|sex| sex of babies given first_name | `varchar` |
+|num| number of babies of sex given first_name in that year | `int` |
+
+## Case Study Questions & Solutions
+
+**1. Classic American names:**
+```sql
+SELECT first_name, SUM(num)
+FROM baby_names
+GROUP BY first_name
+HAVING COUNT(year) = 101
+ORDER BY 2 DESC 
+```
+Answer:
+  
+| first_name | sum |
+|-|-|
+|James|	4748138 |
+|John|	4510721 |
+|William|	3614424 |
+|David| 3571498 |
+|Joseph| 2361382 |
+|Thomas| 2166802 |
+|Charles | 2112352 |
+|Elizabeth | 1436286 |
+
+- The SQL query retrieves the `first_name` and calculates the sum of that names.
+- This query orders the result with the most popular names at top.
+- Then it filter for those names that appear in all 101 years.
+
+**2. Timeless or trendy?**
+```sql
+SELECT first_name, sum(num), 
+    CASE WHEN count(first_name) > 80 THEN 'Classic'
+         WHEN count(first_name) BETWEEN 50 AND 80 THEN 'Semi-classic'
+         WHEN count(first_name) BETWEEN 20 AND 50 THEN 'Semi-trendy'
+         WHEN count(first_name) BETWEEN 0 AND 20 THEN 'Trendy'
+    END AS popularity_type
+FROM baby_names
+GROUP BY first_name
+ORDER BY first_name
+```
+
+Answer:
+
+| first_name | sum | popularity_type |
+|-|-|-|
+|Aaliyah|	15870 | Trendy |
+|Aaron|	530592 | Semi-classic |
+|Abigail|	338485 | Semi-trendy |
+|Adam|	497293 | Semi-trendy |
+|Addison|	107433 | Trendy |
+
+- The SQL query performs Classification for each name's popularity.
+- The names are classified into the four categories: 'Classic', 'Semi-classic', 'Semi-trendy', or 'Trendy'
+- If the name appears in the dataset for more than 80 years -> 'Classic'  
+- If the name appears in the dataset for between 50 and 80 years -> 'Semi-classic'
+- If the name appears in the dataset for between 20 and 50 years -> 'Semi-trendy'
+- If the name appears in the dataset for less than 20 years -> 'Trendy'
+- The above SQL result is a preview. You can view the complete result at [here]()
+    
+  
+  
+
 
 
