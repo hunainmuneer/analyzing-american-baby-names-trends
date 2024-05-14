@@ -1,6 +1,6 @@
 # American Baby Names Analysis
 
-[](baby_names.jpeg)
+![](baby_names.jpeg)
 
 Photo by Travis Wise on [Wikimedia](https://commons.wikimedia.org/wiki/File:Hello_My_Name_Is_(15283079263).jpg)
 
