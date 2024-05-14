@@ -1,10 +1,15 @@
 # American Baby Names Analysis
 
-This project showcases sophisticated data analysis skills by uncovering century-long American baby name trends and identifying the name with the most years as the top choice, employing SQL queries and window functions.
+## Description
 
-## Overview
+What makes a name timeless or trendy? In this project, we will use data published by the U.S. Social Security Administration spanning over a hundred years to understand American baby name tastes.
 
-This project delves into the analysis of American baby names spanning a century, revealing insights into naming trends and popularity over time. Through SQL queries, it uncovers timeless classics, identifies trends, ranks top female names, assists in name selection based on preferences, and explores the ascent of specific names like Olivia. Employing window functions and subqueries, it offers a comprehensive understanding of popular male names across years, culminating in the determination of the name reigning supreme for the most number of years. This project showcases not only analytical prowess but also the ability to derive meaningful insights from vast datasets, making it a compelling demonstration of data analysis skills.
+## Methodology
+
+- SQL is utilized for this project to   
+The ranking, grouping, joining, ordering, and pattern matching skills you'll use in this project are broadly applicable: understanding changing tastes is a key competency for businesses as well as parents searching for a baby name!
+
+
 
 ## Project Structure
 
